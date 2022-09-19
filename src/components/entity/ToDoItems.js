@@ -15,7 +15,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getEntities } from '../../../reducer/entityReducer/toDoSlice';
+import { getEntities } from '../../reducer/entityReducer/toDoSlice';
 
 import './ToDoItems.scss';
 
@@ -105,17 +105,32 @@ const ToDoItems = () => {
   const rows = useSelector((state) => state.toDo.entities);
   const isLoading = useSelector((state) => state.toDo.isLoading);
 
+  const sortByDateDesc = (a, b) => {
+    if (a.creationDate > b.creationDate) {
+      return -1;
+    } else if (a.creationDate < b.creationDate) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
   useEffect(() => {
     dispatch(getEntities());
   }, [dispatch]);
 
   if (rows.length === 0) {
     return (
-      <Alert severity='info' variant='filled' style={{ marginTop: '2rem' }}>
+      <Alert severity='info' variant='outlined' style={{ marginTop: '2rem' }}>
         Nessuna nota creata
       </Alert>
     );
   }
+
+  const categoriesSorted = () => {
+    let catg = [...rows];
+    return catg.sort(sortByDateDesc);
+  };
 
   return (
     <>
@@ -135,7 +150,7 @@ const ToDoItems = () => {
             </TableHead>
             <TableBody>
               {rows &&
-                rows.map((row) => (
+                categoriesSorted().map((row) => (
                   <RowTable key={row.id} note={row} category={row.category} />
                 ))}
             </TableBody>

@@ -5,4 +5,5 @@
   text-align: center;
   justify-content: center;
   margin-top: 2rem;
+  min-width: 50vw;
 }

@@ -17,6 +17,12 @@ export const getEntities = createAsyncThunk('toDo/getEntities', async () => {
   });
 });
 
+export const saveEntity = createAsyncThunk('toDo/saveEntity', async (toDo) => {
+  return axios.post(URL, toDo).then((res) => {
+    return res.data;
+  });
+});
+
 const toDoSlice = createSlice({
   name: 'todo',
   initialState: initialState,
@@ -31,8 +37,16 @@ const toDoSlice = createSlice({
         state.entities = action.payload;
         state.isLoading = false;
       })
+      .addCase(saveEntity.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        state.updateSuccess = true;
+        state.entities.push(action.payload);
+      })
       .addMatcher(isPending(getEntities), (state) => {
         state.isLoading = true;
+      })
+      .addMatcher(isPending(saveEntity), (state) => {
+        state.isUpdating = true;
       });
   },
 });
