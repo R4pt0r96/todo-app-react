@@ -4,6 +4,10 @@
   border-radius: 10px;
   background-color: rgba(255, 255, 0, 0.288);
 
+  .row_todo_completed {
+    background-color: rgba(56, 56, 56, 0.288);
+  }
+
   .row_todo:hover {
     background-color: rgba(48, 48, 48, 0.158);
   }

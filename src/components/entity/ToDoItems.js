@@ -13,14 +13,24 @@ import {
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import React, { useEffect } from 'react';
+import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp';
+import DriveFileRenameOutlineSharpIcon from '@mui/icons-material/DriveFileRenameOutlineSharp';
+import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getEntities } from '../../reducer/entityReducer/toDoSlice';
+import {
+  deleteEntity,
+  getEntities,
+  updateEntity as updateToDo,
+} from '../../reducer/entityReducer/toDoSlice';
 
 import './ToDoItems.scss';
+import EditToDo from './EditToDo';
 
 const RowTable = ({ note, category }) => {
+  const dispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
+  const [editModal, setEditModal] = useState(false);
 
   const convertDate = (date) => {
     const dateConverted = new Date(date);
@@ -33,10 +43,25 @@ const RowTable = ({ note, category }) => {
     );
   };
 
+  const handleCheckNote = (toDo) => {
+    let toDoChecked = { ...toDo };
+    toDoChecked.isCompleted = true;
+    dispatch(updateToDo(toDoChecked));
+  };
+
+  const handleModal = () => {
+    setEditModal(!editModal);
+  };
+
   return (
     <>
+      {editModal && (
+        <EditToDo todo={note} open={editModal} handleClose={handleModal} />
+      )}
       <TableRow
-        className='row_todo'
+        className={
+          note.isCompleted ? 'row_todo_completed row_todo' : 'row_todo'
+        }
         sx={{ '& > *': { borderBottom: 'unset' } }}
       >
         <TableCell>
@@ -55,7 +80,32 @@ const RowTable = ({ note, category }) => {
         <TableCell align='center'>
           {note.completedDate ? convertDate(note.completedDate) : 'in corso'}
         </TableCell>
-        <TableCell align='right'>Pulsanti</TableCell>
+        <TableCell align='right'>
+          {!note.isCompleted && (
+            <IconButton color='primary' onClick={handleModal}>
+              <DriveFileRenameOutlineSharpIcon />
+            </IconButton>
+          )}
+          {!note.isCompleted && (
+            <IconButton
+              color='success'
+              onClick={() => {
+                handleCheckNote(note);
+              }}
+            >
+              <CheckCircleSharpIcon />
+            </IconButton>
+          )}
+          <IconButton
+            color='error'
+            aria-label='delete'
+            onClick={() => {
+              dispatch(deleteEntity(note.id));
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -150,9 +200,33 @@ const ToDoItems = () => {
             </TableHead>
             <TableBody>
               {rows &&
-                categoriesSorted().map((row) => (
-                  <RowTable key={row.id} note={row} category={row.category} />
-                ))}
+                categoriesSorted().map((row) => {
+                  if (!row.isCompleted) {
+                    return (
+                      <RowTable
+                        key={row.id}
+                        note={row}
+                        category={row.category}
+                      />
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
+              {rows &&
+                categoriesSorted().map((row) => {
+                  if (row.isCompleted) {
+                    return (
+                      <RowTable
+                        key={row.id}
+                        note={row}
+                        category={row.category}
+                      />
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
             </TableBody>
           </Table>
         </TableContainer>
